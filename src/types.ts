@@ -40,9 +40,18 @@ export interface Message {
   channelId?: string;
   receiverId?: string;
   timestamp: any; // Firestore Timestamp
-  fileUrl?: string;
-  fileName?: string;
+  files?: {
+    url: string;
+    name: string;
+    type: string;
+  }[];
   threadId?: string;
+  replyCount?: number;
+  reactions?: {
+    [emoji: string]: string[]; // Array of user IDs
+  };
+  mentions?: string[]; // Array of user IDs
+  isVoiceNote?: boolean;
 }
 
 export interface TypingStatus {

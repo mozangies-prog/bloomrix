@@ -30,7 +30,7 @@ export default function FilesView({
   // Filter messages with files and in the current workspace
   const files = messages
     .filter(msg => {
-      if (!msg.fileUrl) return false;
+      if (!msg.files || msg.files.length === 0) return false;
 
       // Check if the message belongs to the current workspace
       if (msg.channelId) {
@@ -43,9 +43,10 @@ export default function FilesView({
 
       return true;
     })
+    .flatMap(msg => msg.files!.map(file => ({ ...file, msg }))) // Flatten to show each file
     .sort((a, b) => {
-      const aDate = a.timestamp?.toDate ? a.timestamp.toDate().getTime() : 0;
-      const bDate = b.timestamp?.toDate ? b.timestamp.toDate().getTime() : 0;
+      const aDate = a.msg.timestamp?.toDate ? a.msg.timestamp.toDate().getTime() : 0;
+      const bDate = b.msg.timestamp?.toDate ? b.msg.timestamp.toDate().getTime() : 0;
       return bDate - aDate;
     });
 
@@ -63,14 +64,15 @@ export default function FilesView({
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {files.map(msg => {
+            {files.map((file, idx) => {
+              const msg = file.msg;
               const sender = users.find(u => u.id === msg.senderId);
               const channel = channels.find(c => c.id === msg.channelId);
               const date = msg.timestamp?.toDate ? msg.timestamp.toDate() : new Date();
 
               return (
                 <div 
-                  key={msg.id}
+                  key={`${msg.id}-${idx}`}
                   className="p-4 border border-gray-100 rounded-lg hover:bg-gray-50 transition-colors group relative"
                 >
                   <div className="flex items-start space-x-3 mb-3">
@@ -78,7 +80,7 @@ export default function FilesView({
                       <FileText className="w-6 h-6 text-blue-600" />
                     </div>
                     <div className="flex-1 min-w-0">
-                      <p className="text-sm font-bold text-gray-900 truncate">{msg.fileName || 'Untitled File'}</p>
+                      <p className="text-sm font-bold text-gray-900 truncate">{file.name || 'Untitled File'}</p>
                       <p className="text-[11px] text-gray-500">{format(date, 'MMM d, yyyy')}</p>
                     </div>
                   </div>
@@ -111,7 +113,7 @@ export default function FilesView({
                       )}
                     </div>
                     <a 
-                      href={msg.fileUrl} 
+                      href={file.url} 
                       target="_blank" 
                       rel="noopener noreferrer"
                       className="p-1.5 hover:bg-blue-100 rounded-full text-blue-600 transition-colors"

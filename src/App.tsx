@@ -16,7 +16,9 @@ import {
   Timestamp,
   getDocs,
   setDoc,
-  serverTimestamp
+  updateDoc,
+  serverTimestamp,
+  increment
 } from 'firebase/firestore';
 import { auth, db } from './firebase';
 import { User, Channel, Message, UserRole, ChannelType, Workspace } from './types';
@@ -355,20 +357,28 @@ export default function App() {
     localStorage.removeItem('bloomrix_user');
   };
 
-  const handleSendMessage = async (content: string, file?: { url: string, name: string }) => {
+  const handleSendMessage = async (
+    content: string, 
+    files?: { url: string, name: string, type: string }[], 
+    threadId?: string, 
+    isVoiceNote?: boolean
+  ) => {
     if (!currentUser) return;
 
     const messageId = Math.random().toString(36).substr(2, 9);
-    const messageData: Partial<Message> = {
+    const messageData: Message = {
       id: messageId,
       senderId: currentUser.id,
       content,
       timestamp: serverTimestamp(),
+      files: files || [],
+      reactions: {},
+      replyCount: 0,
+      isVoiceNote: isVoiceNote || false
     };
 
-    if (file) {
-      messageData.fileUrl = file.url;
-      messageData.fileName = file.name;
+    if (threadId) {
+      messageData.threadId = threadId;
     }
 
     if (activeChannelId) {
@@ -379,6 +389,13 @@ export default function App() {
 
     try {
       await setDoc(doc(db, 'messages', messageId), messageData);
+      
+      // If it's a reply, update parent message reply count
+      if (threadId) {
+        await updateDoc(doc(db, 'messages', threadId), {
+          replyCount: increment(1)
+        });
+      }
     } catch (err) {
       handleFirestoreError(err, OperationType.WRITE, 'messages');
     }
@@ -388,6 +405,29 @@ export default function App() {
       channelId: activeChannelId,
       receiverId: activeDMUserId
     });
+  };
+
+  const handleReact = async (messageId: string, emoji: string) => {
+    if (!currentUser) return;
+    const message = messages.find(m => m.id === messageId);
+    if (!message) return;
+
+    const reactions = { ...(message.reactions || {}) };
+    const userIds = [...(reactions[emoji] || [])];
+    
+    if (userIds.includes(currentUser.id)) {
+      reactions[emoji] = userIds.filter(id => id !== currentUser.id);
+      if (reactions[emoji].length === 0) delete reactions[emoji];
+    } else {
+      reactions[emoji] = [...userIds, currentUser.id];
+    }
+
+    try {
+      await updateDoc(doc(db, 'messages', messageId), { reactions });
+      socket.emit('message_reaction', { messageId, reactions });
+    } catch (err) {
+      handleFirestoreError(err, OperationType.WRITE, 'messages');
+    }
   };
 
   const handleTyping = (isTyping: boolean) => {
@@ -590,6 +630,7 @@ export default function App() {
               messages={messages}
               typingUsers={typingUsers}
               onSendMessage={handleSendMessage}
+              onReact={handleReact}
               onTyping={handleTyping}
               onSearch={() => {}}
               onToggleStar={handleToggleStar}
