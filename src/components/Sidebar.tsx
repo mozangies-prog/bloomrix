@@ -134,7 +134,10 @@ export default function Sidebar({
               {currentUser.initial}
             </div>
           )}
-          <div className="absolute bottom-0 right-0 w-3 h-3 bg-green-500 rounded-full border-2 border-[#3f0e40]" />
+          <div className={cn(
+            "absolute bottom-0 right-0 w-3 h-3 rounded-full border-2 border-[#3f0e40]",
+            currentUser.isOnline ? "bg-green-500" : "bg-gray-500"
+          )} />
           <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
             <LogOut className="w-4 h-4 text-white" />
           </div>
@@ -294,7 +297,10 @@ export default function Sidebar({
                             {user.initial}
                           </div>
                         )}
-                        <div className="absolute -bottom-0.5 -right-0.5 w-2 h-2 bg-green-500 rounded-full border border-[#3F0E40]" />
+                        <div className={cn(
+                          "absolute -bottom-0.5 -right-0.5 w-2 h-2 rounded-full border border-[#3F0E40]",
+                          user.isOnline ? "bg-green-500" : "bg-gray-500"
+                        )} />
                       </div>
                       <span className="truncate">{user.name}</span>
                     </button>

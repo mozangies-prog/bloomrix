@@ -9,6 +9,8 @@ export interface User {
   color: string;
   initial: string;
   role: UserRole;
+  isOnline?: boolean;
+  lastSeen?: any; // Firestore Timestamp
   workspaces?: string[]; // IDs of workspaces the user is a member of
   starredChannels?: string[];
   starredDMs?: string[];

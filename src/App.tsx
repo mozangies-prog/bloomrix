@@ -148,6 +148,33 @@ export default function App() {
   const [activeWorkspaceId, setActiveWorkspaceId] = useState<string | undefined>();
   const [activeDMUserId, setActiveDMUserId] = useState<string | undefined>();
   const [activeView, setActiveView] = useState<'home' | 'dms' | 'activity' | 'files'>('home');
+
+  // Presence management
+  useEffect(() => {
+    if (!currentUser) return;
+
+    const userRef = doc(db, 'users', currentUser.id);
+    
+    // Set online
+    updateDoc(userRef, {
+      isOnline: true,
+      lastSeen: serverTimestamp()
+    }).catch(err => handleFirestoreError(err, OperationType.WRITE, 'users'));
+
+    // Set offline on unmount/unload
+    const setOffline = () => {
+      updateDoc(userRef, {
+        isOnline: false,
+        lastSeen: serverTimestamp()
+      }).catch(err => handleFirestoreError(err, OperationType.WRITE, 'users'));
+    };
+
+    window.addEventListener('beforeunload', setOffline);
+    return () => {
+      window.removeEventListener('beforeunload', setOffline);
+      setOffline();
+    };
+  }, [currentUser?.id]);
   const [isAdminOpen, setIsAdminOpen] = useState(false);
   const [typingUsers, setTypingUsers] = useState<string[]>([]);
 

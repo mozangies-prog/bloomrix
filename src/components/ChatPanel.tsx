@@ -232,6 +232,9 @@ export default function ChatPanel({
               <button className="flex items-center space-x-1 hover:bg-gray-100 px-2 py-1 rounded">
                 <div className="text-gray-500">{icon}</div>
                 <h2 className="text-base font-bold text-gray-900">{title}</h2>
+                {activeDMUser && (
+                  <div className={cn("w-2 h-2 rounded-full", activeDMUser.isOnline ? "bg-green-500" : "bg-gray-500")} />
+                )}
                 <ChevronDown className="w-4 h-4 text-gray-500" />
               </button>
             </div>
@@ -262,7 +265,7 @@ export default function ChatPanel({
             ) : (
               filteredMessages.map((msg, idx) => {
                 const showAvatar = idx === 0 || filteredMessages[idx - 1].senderId !== msg.senderId;
-                const msgDate = msg.timestamp?.toDate ? msg.timestamp.toDate() : new Date();
+                const msgDate = msg.timestamp?.toDate ? msg.timestamp.toDate() : (msg.timestamp ? new Date(msg.timestamp) : new Date());
                 const prevMsgDate = filteredMessages[idx-1]?.timestamp?.toDate ? filteredMessages[idx-1].timestamp.toDate() : null;
                 const showDateHeader = idx === 0 || (prevMsgDate && format(prevMsgDate, 'yyyy-MM-dd') !== format(msgDate, 'yyyy-MM-dd'));
 
@@ -434,7 +437,7 @@ export default function ChatPanel({
                 msg={parentMessage}
                 showAvatar={true}
                 showDateHeader={false}
-                msgDate={parentMessage.timestamp?.toDate ? parentMessage.timestamp.toDate() : new Date()}
+                msgDate={parentMessage.timestamp?.toDate ? parentMessage.timestamp.toDate() : (parentMessage.timestamp ? new Date(parentMessage.timestamp) : new Date())}
                 users={users}
                 currentUser={currentUser}
                 isThreadParent={true}
@@ -450,7 +453,7 @@ export default function ChatPanel({
                   msg={msg}
                   showAvatar={idx === 0 || threadMessages[idx - 1].senderId !== msg.senderId}
                   showDateHeader={false}
-                  msgDate={msg.timestamp?.toDate ? msg.timestamp.toDate() : new Date()}
+                  msgDate={msg.timestamp?.toDate ? msg.timestamp.toDate() : (msg.timestamp ? new Date(msg.timestamp) : new Date())}
                   users={users}
                   currentUser={currentUser}
                 />
@@ -540,7 +543,7 @@ function MessageItem({
       )}>
         <div className="w-10 mr-3 flex-shrink-0">
           {showAvatar ? (
-            <div className="w-10 h-10 rounded overflow-hidden">
+            <div className="w-10 h-10 rounded overflow-hidden relative">
               {sender?.avatar ? (
                 <img 
                   src={sender.avatar} 
@@ -552,6 +555,9 @@ function MessageItem({
                 <div className={cn("w-full h-full flex items-center justify-center text-white font-bold", sender?.color || 'bg-gray-400')}>
                   {sender?.initial || '?'}
                 </div>
+              )}
+              {sender?.isOnline && (
+                <div className="absolute bottom-0 right-0 w-2.5 h-2.5 bg-green-500 rounded-full border-2 border-white" />
               )}
             </div>
           ) : (
