@@ -9,24 +9,15 @@
       // and libraries (like socket.io or polyfills) try to overwrite it.
       (function() {
         try {
-          const descriptor = Object.getOwnPropertyDescriptor(window, 'fetch');
-          if (descriptor && descriptor.get && !descriptor.set) {
-            if (descriptor.configurable) {
-              const originalFetch = window.fetch;
-              Object.defineProperty(window, 'fetch', {
-                get: () => originalFetch,
-                set: (val) => { 
-                  console.warn('Something tried to overwrite window.fetch. Ignored.'); 
-                },
-                configurable: true
-              });
-              console.log('window.fetch was a getter-only property. Added a dummy setter.');
-            } else {
-              console.warn('window.fetch is a getter-only property and NOT configurable.');
-            }
-          }
+          var f = window.fetch;
+          Object.defineProperty(window, 'fetch', {
+            configurable: true,
+            enumerable: true,
+            get: function() { return f; },
+            set: function(v) { f = v; }
+          });
         } catch (e) {
-          console.warn('Could not fix window.fetch descriptor:', e);
+          console.warn('Could not apply window.fetch fix:', e);
         }
       })();
     </script>

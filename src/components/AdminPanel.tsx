@@ -26,6 +26,7 @@ interface AdminPanelProps {
   onCreateChannel: (name: string, type: ChannelType) => void;
   onDeleteChannel: (channelId: string) => void;
   onCreateWorkspace: (name: string, color: string, initial: string) => void;
+  onDeleteWorkspace: (workspaceId: string) => void;
   onUpdateMembership: (type: 'workspace' | 'channel', id: string, userId: string, action: 'add' | 'remove') => void;
   onUpdateUser: (userId: string, updates: Partial<User>) => void;
   onClose: () => void;
@@ -40,6 +41,7 @@ export default function AdminPanel({
   onCreateChannel,
   onDeleteChannel,
   onCreateWorkspace,
+  onDeleteWorkspace,
   onUpdateMembership,
   onUpdateUser,
   onClose
@@ -269,6 +271,9 @@ export default function AdminPanel({
                     <thead className="bg-gray-50 text-xs font-bold text-gray-500 uppercase tracking-wider">
                       <tr>
                         <th className="px-6 py-3">User</th>
+                        <th className="px-6 py-3">ID</th>
+                        <th className="px-6 py-3">Username</th>
+                        <th className="px-6 py-3">Password</th>
                         <th className="px-6 py-3">Role</th>
                         <th className="px-6 py-3 text-right">Actions</th>
                       </tr>
@@ -290,7 +295,12 @@ export default function AdminPanel({
                               </div>
                             )}
                             <div className="flex flex-col">
-                              <span className="font-medium text-gray-900">{user.name}</span>
+                              <input 
+                                type="text" 
+                                className="font-medium text-gray-900 bg-transparent border-none p-0 focus:ring-0 w-32"
+                                defaultValue={user.name}
+                                onBlur={(e) => onUpdateUser(user.id, { name: e.target.value })}
+                              />
                               <input 
                                 type="text" 
                                 placeholder="Avatar URL"
@@ -299,6 +309,25 @@ export default function AdminPanel({
                                 onBlur={(e) => onUpdateUser(user.id, { avatar: e.target.value || undefined })}
                               />
                             </div>
+                          </td>
+                          <td className="px-6 py-4">
+                            <span className="text-xs text-gray-400 font-mono">{user.id}</span>
+                          </td>
+                          <td className="px-6 py-4">
+                            <input 
+                              type="text" 
+                              className="text-sm text-gray-600 bg-transparent border border-gray-100 rounded px-1 focus:ring-1 focus:ring-purple-200 w-24"
+                              defaultValue={user.username}
+                              onBlur={(e) => onUpdateUser(user.id, { username: e.target.value })}
+                            />
+                          </td>
+                          <td className="px-6 py-4">
+                            <input 
+                              type="text" 
+                              className="text-sm text-gray-600 bg-transparent border border-gray-100 rounded px-1 focus:ring-1 focus:ring-purple-200 w-24"
+                              defaultValue={user.password}
+                              onBlur={(e) => onUpdateUser(user.id, { password: e.target.value })}
+                            />
                           </td>
                           <td className="px-6 py-4">
                             <span className={cn(
@@ -393,7 +422,8 @@ export default function AdminPanel({
                           <Users className="w-4 h-4" />
                         </button>
                         <button 
-                          className="p-2 text-gray-300 hover:text-red-600 hover:bg-red-50 rounded-lg transition-all opacity-0 group-hover:opacity-100"
+                          onClick={() => onDeleteWorkspace(ws.id)}
+                          className="p-2 text-gray-300 hover:text-red-600 hover:bg-red-50 rounded-lg transition-all"
                         >
                           <Trash2 className="w-4 h-4" />
                         </button>
@@ -490,7 +520,7 @@ export default function AdminPanel({
                         </button>
                         <button 
                           onClick={() => onDeleteChannel(channel.id)}
-                          className="p-2 text-gray-300 hover:text-red-600 hover:bg-red-50 rounded-lg transition-all opacity-0 group-hover:opacity-100"
+                          className="p-2 text-gray-300 hover:text-red-600 hover:bg-red-50 rounded-lg transition-all"
                         >
                           <Trash2 className="w-4 h-4" />
                         </button>

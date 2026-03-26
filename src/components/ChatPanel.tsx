@@ -5,26 +5,19 @@ import {
   Send, 
   Paperclip, 
   Smile, 
-  Info, 
-  Search, 
   Hash, 
   Lock, 
   User as UserIcon,
   Image as ImageIcon,
   FileText,
   X,
-  Phone,
-  Video,
-  Bell,
-  MoreVertical,
   AtSign,
   Mic,
   Type,
   Plus,
   ChevronDown,
   MessageSquare,
-  Files,
-  Star
+  Files
 } from 'lucide-react';
 import { format } from 'date-fns';
 import { motion, AnimatePresence } from 'motion/react';
@@ -136,32 +129,8 @@ export default function ChatPanel({
               <h2 className="text-base font-bold text-gray-900">{title}</h2>
               <ChevronDown className="w-4 h-4 text-gray-500" />
             </button>
-            <button 
-              onClick={() => {
-                if (activeChannel) onToggleStar('channel', activeChannel.id);
-                else if (activeDMUser) onToggleStar('dm', activeDMUser.id);
-              }}
-              className={cn(
-                "p-1 rounded hover:bg-gray-100 transition-colors",
-                isStarred ? "text-yellow-500" : "text-gray-400"
-              )}
-            >
-              <Star className={cn("w-4 h-4", isStarred && "fill-current")} />
-            </button>
           </div>
           <div className="flex items-center space-x-1">
-            <button className="p-2 hover:bg-gray-100 rounded text-gray-500">
-              <Phone className="w-4 h-4" />
-            </button>
-            <button className="p-2 hover:bg-gray-100 rounded text-gray-500">
-              <Bell className="w-4 h-4" />
-            </button>
-            <button className="p-2 hover:bg-gray-100 rounded text-gray-500">
-              <Search className="w-4 h-4" />
-            </button>
-            <button className="p-2 hover:bg-gray-100 rounded text-gray-500">
-              <MoreVertical className="w-4 h-4" />
-            </button>
           </div>
         </div>
         <div className="px-4 flex items-center space-x-6 text-sm font-medium text-gray-500 pb-1">
@@ -341,9 +310,6 @@ export default function ChatPanel({
                 <AtSign className="w-4 h-4" />
               </button>
               <div className="w-[1px] h-4 bg-gray-200 mx-1" />
-              <button className="p-2 hover:bg-gray-100 rounded text-gray-500 transition-colors">
-                <Video className="w-4 h-4" />
-              </button>
               <button className="p-2 hover:bg-gray-100 rounded text-gray-500 transition-colors">
                 <Mic className="w-4 h-4" />
               </button>

@@ -151,6 +151,15 @@ export default function App() {
 
   // Load users and channels
   useEffect(() => {
+    const savedUser = localStorage.getItem('bloomrix_user');
+    if (savedUser) {
+      try {
+        setCurrentUser(JSON.parse(savedUser));
+      } catch (e) {
+        localStorage.removeItem('bloomrix_user');
+      }
+    }
+
     async function testConnection() {
       try {
         await getDocFromServer(doc(db, 'test', 'connection'));
@@ -174,8 +183,9 @@ export default function App() {
         }
       }
       
-      // Bootstrap initial admin if no users exist
-      if (snapshot.empty) {
+      // Bootstrap initial admin if no users exist or if admin user is missing
+      const adminExists = usersData.some(u => u.username === 'admin');
+      if (!adminExists) {
         const adminId = 'admin-1';
         setDoc(doc(db, 'users', adminId), {
           id: adminId,
@@ -448,6 +458,26 @@ export default function App() {
     }
   };
 
+  const handleDeleteChannel = async (channelId: string) => {
+    try {
+      await deleteDoc(doc(db, 'channels', channelId));
+    } catch (err) {
+      handleFirestoreError(err, OperationType.DELETE, 'channels');
+    }
+  };
+
+  const handleDeleteWorkspace = async (workspaceId: string) => {
+    try {
+      await deleteDoc(doc(db, 'workspaces', workspaceId));
+      if (activeWorkspaceId === workspaceId) {
+        setActiveWorkspaceId(undefined);
+        setActiveChannelId(undefined);
+      }
+    } catch (err) {
+      handleFirestoreError(err, OperationType.DELETE, 'workspaces');
+    }
+  };
+
   const handleCreateWorkspace = async (name: string, color: string, initial: string) => {
     if (!currentUser) return;
     const id = Math.random().toString(36).substr(2, 9);
@@ -483,14 +513,6 @@ export default function App() {
       await setDoc(doc(db, collectionName, id), { ...item, members: newMembers });
     } catch (err) {
       handleFirestoreError(err, OperationType.WRITE, collectionName);
-    }
-  };
-
-  const handleDeleteChannel = async (channelId: string) => {
-    try {
-      await deleteDoc(doc(db, 'channels', channelId));
-    } catch (err) {
-      handleFirestoreError(err, OperationType.DELETE, 'channels');
     }
   };
 
@@ -638,6 +660,7 @@ export default function App() {
               onCreateChannel={handleCreateChannel}
               onDeleteChannel={handleDeleteChannel}
               onCreateWorkspace={handleCreateWorkspace}
+              onDeleteWorkspace={handleDeleteWorkspace}
               onUpdateMembership={handleUpdateMembership}
               onUpdateUser={handleUpdateUser}
               onClose={() => setIsAdminOpen(false)}

@@ -61,7 +61,6 @@ export default function Sidebar({
   const navItems = [
     { icon: Home, label: 'Home', id: 'home' as const },
     { icon: MessageSquare, label: 'DMs', id: 'dms' as const },
-    { icon: Bell, label: 'Activity', id: 'activity' as const },
     { icon: Files, label: 'Files', id: 'files' as const },
     { icon: Settings, label: 'Admin', id: 'admin' as const, onClick: onOpenAdmin },
   ];
@@ -151,7 +150,6 @@ export default function Sidebar({
             <ChevronDown className="w-4 h-4 ml-1 opacity-60 group-hover:opacity-100" />
           </div>
           <div className="flex items-center space-x-2">
-            <Search className="w-4 h-4 opacity-60" />
             {currentUser.role === 'admin' && (
               <div onClick={onOpenAdmin} className="w-8 h-8 rounded-md flex items-center justify-center hover:bg-white/10">
                 <Plus className="w-5 h-5" />
@@ -166,7 +164,6 @@ export default function Sidebar({
           <div className="mb-4">
             <div className="px-4 py-1 flex items-center text-sm font-medium group cursor-pointer hover:text-white">
               <ChevronDown className="w-3 h-3 mr-2 opacity-60" />
-              <Star className="w-3 h-3 mr-2 opacity-60" />
               Starred
             </div>
             <div className="space-y-[1px]">
